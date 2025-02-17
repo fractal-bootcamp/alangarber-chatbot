@@ -12,19 +12,17 @@ import { index, int, sqliteTableCreator, text } from "drizzle-orm/sqlite-core";
  */
 export const createTable = sqliteTableCreator((name) => `fractal-chatbot_${name}`);
 
-export const posts = createTable(
-  "post",
+export const messages = createTable(
+  "message",
   {
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: text("name", { length: 256 }),
+    role: text("role").notNull(), // "user" or "assistant"
+    content: text("content").notNull(),
     createdAt: int("created_at", { mode: "timestamp" })
       .default(sql`(unixepoch())`)
       .notNull(),
-    updatedAt: int("updated_at", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
-    ),
   },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
+  (msg) => ({
+    roleIndex: index("role_idx").on(msg.role),
   })
 );
