@@ -1,19 +1,18 @@
 "use client";
 
-import { Message, useChat } from "@ai-sdk/react";
-import { useState } from "react";
+import { type Message, useChat } from "@ai-sdk/react";
 
 export default function Chat({ id, initialMessages }: { id?: string; initialMessages?: Message[] }) {
-  if (!id) {
-    console.error("🚨 Error: Chat ID is missing in Chat component!");
-    return <div>Error: Chat ID is missing.</div>;
-  }
-
   const { input, handleInputChange, handleSubmit, messages, isLoading } = useChat({
     id,
     initialMessages,
     sendExtraMessageFields: true,
   });
+
+  if (!id) {
+    console.error("🚨 Error: Chat ID is missing in Chat component!");
+    return <div>Error: Chat ID is missing.</div>;
+  }
 
   return (
     <div style={{ textAlign: "center", padding: "2rem" }}>

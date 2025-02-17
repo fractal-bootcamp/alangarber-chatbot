@@ -1,11 +1,17 @@
 import { openai } from "@ai-sdk/openai";
+import { type Message } from "@ai-sdk/react";
 import { appendResponseMessages, streamText } from "ai";
 import { saveChat, loadChat } from "@/tools/chat-store";
+
+interface ChatRequestBody {
+    id: string;
+    messages: Message[];
+}
 
 export async function POST(req: Request) {
   try {
     // Log incoming request
-    const body = await req.json();
+    const body = await req.json() as ChatRequestBody;
     console.log("📝 Received API request:", JSON.stringify(body, null, 2));
 
     const { id, messages } = body;
@@ -16,9 +22,9 @@ export async function POST(req: Request) {
     }
 
     // 🔥 Fix: Extract the last message instead of expecting `message` directly
-    const message = messages[messages.length - 1];
+    const message = messages[messages.length - 1]!;
 
-    if (!message || !message.role || !message.content) {
+    if (!message?.role || !message.content) {
       console.error("🚨 Error: Last message is invalid!", message);
       return new Response("Invalid request: last message is missing required fields", { status: 400 });
     }
@@ -30,13 +36,13 @@ export async function POST(req: Request) {
     console.log("🔄 Processing chat with OpenAI...");
     const result = streamText({
       model: openai("gpt-4o"),
-      messages: updatedMessages,
+      messages: updatedMessages as Message[],
       async onFinish({ response }) {
         console.log("💾 Saving chat messages...");
         await saveChat({
           id,
           messages: appendResponseMessages({
-            messages: updatedMessages,
+            messages: updatedMessages as Message[],
             responseMessages: response.messages,
           }),
         });
