@@ -10,7 +10,6 @@ interface ChatRequestBody {
 
 export async function POST(req: Request) {
   try {
-    // Log incoming request
     const body = await req.json() as ChatRequestBody;
     console.log("📝 Received API request:", JSON.stringify(body, null, 2));
 
@@ -21,7 +20,6 @@ export async function POST(req: Request) {
       return new Response("Invalid request: chat ID or message missing", { status: 400 });
     }
 
-    // 🔥 Fix: Extract the last message instead of expecting `message` directly
     const message = messages[messages.length - 1]!;
 
     if (!message?.role || !message.content) {

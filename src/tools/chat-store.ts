@@ -18,23 +18,19 @@ export async function saveChat({ id, messages: chatMessages }: { id: string; mes
 
   if (!id) {
     console.error("🚨 Error: Chat ID is undefined in saveChat()");
-    console.trace();  // 🚨 This will show a full stack trace!
     throw new Error("Chat ID cannot be undefined");
   }
   if (!Array.isArray(chatMessages) || chatMessages.length === 0) {
     console.error("🚨 Error: Messages are undefined or empty in saveChat()");
-    console.trace();  // 🚨 This will show where the empty messages come from!
     throw new Error("Messages cannot be undefined or empty");
   }
 
   chatMessages.forEach((msg, index) => {
     if (!msg) {
       console.error(`🚨 Message at index ${index} is undefined!`);
-      console.trace();  // 🚨 Find where it's coming from
     }
     if (!msg?.role || !msg?.content) {
       console.error(`🚨 Message at index ${index} is missing required fields:`, msg);
-      console.trace();  // 🚨 Find where it's coming from
     }
   });
 
@@ -50,7 +46,6 @@ export async function saveChat({ id, messages: chatMessages }: { id: string; mes
     );
   } catch (error) {
     console.error("🔥 Database Insertion Error:", error);
-    console.trace();  // 🚨 See exactly where this is happening
     throw error;
   }
 
