@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1739824423252,
+      "tag": "0000_aspiring_punisher",
+      "breakpoints": true
+    }
+  ]
+}
