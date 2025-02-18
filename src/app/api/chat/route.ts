@@ -1,7 +1,6 @@
 import { openai } from "@ai-sdk/openai";
-import { type Message } from "@ai-sdk/react";
-import { appendResponseMessages, streamText } from "ai";
-import { saveChat, loadChat } from "@/tools/chat-store";
+import { appendResponseMessages, streamText, type Message } from "ai";
+import { saveChat } from "@/tools/chat-store";
 
 interface ChatRequestBody {
     id: string;
@@ -9,7 +8,6 @@ interface ChatRequestBody {
 }
 
 export async function POST(req: Request) {
-  try {
     const body = await req.json() as ChatRequestBody;
     console.log("📝 Received API request:", JSON.stringify(body, null, 2));
 
@@ -20,7 +18,7 @@ export async function POST(req: Request) {
       return new Response("Invalid request: chat ID or message missing", { status: 400 });
     }
 
-    const message = messages[messages.length - 1]!;
+    const message = messages[messages.length - 1];
 
     if (!message?.role || !message.content) {
       console.error("🚨 Error: Last message is invalid!", message);
@@ -28,19 +26,20 @@ export async function POST(req: Request) {
     }
 
     console.log("✅ Valid request received, loading chat history...");
-    const previousMessages = await loadChat(id);
-    const updatedMessages = [...previousMessages, message];
 
     console.log("🔄 Processing chat with OpenAI...");
     const result = streamText({
       model: openai("gpt-4o"),
-      messages: updatedMessages as Message[],
+      messages,
+      async onError({error}) {
+        console.error(error)
+      },
       async onFinish({ response }) {
         console.log("💾 Saving chat messages...");
         await saveChat({
           id,
           messages: appendResponseMessages({
-            messages: updatedMessages as Message[],
+            messages,
             responseMessages: response.messages,
           }),
         });
@@ -49,8 +48,4 @@ export async function POST(req: Request) {
     });
 
     return result.toDataStreamResponse();
-  } catch (error) {
-    console.error("🔥 API Error:", error);
-    return new Response("Internal Server Error", { status: 500 });
-  }
 }

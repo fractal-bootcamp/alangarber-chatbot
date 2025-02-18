@@ -16,7 +16,7 @@ export const messages = createTable(
   {
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
     chatId: text("chat_id").notNull().references(() => chats.id),
-    role: text("role").notNull(), // "user" or "assistant"
+    role: text("role", { enum: ["user", "assistant", "system", "data"] }).notNull(), // "user" or "assistant"
     content: text("content").notNull(),
     createdAt: int("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
   },

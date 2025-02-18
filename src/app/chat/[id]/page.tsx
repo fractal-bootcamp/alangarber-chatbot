@@ -1,5 +1,5 @@
 import { loadChat } from "@/tools/chat-store";
-import { type Message } from "@ai-sdk/react";
+import { type Message } from "ai";
 import Chat from "@/ui/chat";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
