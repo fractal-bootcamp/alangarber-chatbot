@@ -1,30 +1,26 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
 import { sql } from "drizzle-orm";
 import { index, int, sqliteTableCreator, text } from "drizzle-orm/sqlite-core";
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
 export const createTable = sqliteTableCreator((name) => `fractal-chatbot_${name}`);
 
-export const posts = createTable(
-  "post",
+export const chats = createTable(
+  "chat",
+  {
+    id: text("id").primaryKey(),
+    createdAt: int("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  }
+);
+
+export const messages = createTable(
+  "message",
   {
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: text("name", { length: 256 }),
-    createdAt: int("created_at", { mode: "timestamp" })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    updatedAt: int("updated_at", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
-    ),
+    chatId: text("chat_id").notNull().references(() => chats.id),
+    role: text("role").notNull(), // "user" or "assistant"
+    content: text("content").notNull(),
+    createdAt: int("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
   },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
+  (msg) => ({
+    chatIndex: index("chat_idx").on(msg.chatId),
   })
 );

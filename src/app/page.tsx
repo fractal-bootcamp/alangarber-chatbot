@@ -1,28 +1,11 @@
-'use client';
-
-import { useChat } from 'ai/react';
-
-export default function Page() {
-  const { messages, input, handleSubmit, handleInputChange, isLoading } =
-    useChat();
-
+export default function Home() {
   return (
-    <div>
-      {messages.map(message => (
-        <div key={message.id}>
-          <div>{message.role}</div>
-          <div>{message.content}</div>
-        </div>
-      ))}
-
-      <form onSubmit={handleSubmit}>
-        <input
-          value={input}
-          placeholder="Send a message..."
-          onChange={handleInputChange}
-          disabled={isLoading}
-        />
-      </form>
+    <div style={{ textAlign: "center", padding: "2rem" }}>
+      <h1>Welcome to the Chatbot</h1>
+      <p>Start a conversation with AI</p>
+      <a href="/chat" style={{ fontSize: "1.2rem", padding: "10px", background: "blue", color: "white", borderRadius: "5px", textDecoration: "none" }}>
+        Start Chat
+      </a>
     </div>
   );
 }
