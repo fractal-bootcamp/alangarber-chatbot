@@ -47,12 +47,6 @@ export async function saveChat({
         msg,
       );
     }
-    // for each message, append to the database IF it does not yet exist.
-    try {
-    } catch (error) {
-      console.error("🔥 Database Insertion Error:", error);
-      throw error;
-    }
   });
 
   const messagesWithChatID = messages.map((msg) => {
