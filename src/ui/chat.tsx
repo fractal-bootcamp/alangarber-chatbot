@@ -3,7 +3,7 @@
 import { type Message, useChat } from "@ai-sdk/react";
 
 export default function Chat({ id, initialMessages }: { id?: string; initialMessages?: Message[] }) {
-  const { input, handleInputChange, handleSubmit, messages, isLoading } = useChat({
+  const { input, handleInputChange, handleSubmit, messages, status } = useChat({
     id,
     initialMessages,
     sendExtraMessageFields: true,
@@ -32,10 +32,9 @@ export default function Chat({ id, initialMessages }: { id?: string; initialMess
           value={input}
           onChange={handleInputChange}
           placeholder="Type your message..."
-          disabled={isLoading}
           style={{ flex: "1", padding: "10px" }}
         />
-        <button type="submit" disabled={isLoading} style={{ padding: "10px 15px" }}>
+        <button type="submit" disabled={status !== "ready"} style={{ padding: "10px 15px" }}>
           Send
         </button>
       </form>
