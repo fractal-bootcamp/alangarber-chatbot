@@ -10,12 +10,22 @@ export async function createChat(): Promise<string> {
 }
 
 export async function loadChat(id: string): Promise<Message[]> {
- return await db.select().from(dbMessages).where(eq(dbMessages.chatId, id)).orderBy(dbMessages.createdAt);
+  return await db
+    .select()
+    .from(dbMessages)
+    .where(eq(dbMessages.chatId, id))
+    .orderBy(dbMessages.createdAt);
 }
 
 type ChatID = string;
 
-export async function saveChat({ id, messages }: { id: ChatID; messages: Message[] }) {
+export async function saveChat({
+  id,
+  messages,
+}: {
+  id: ChatID;
+  messages: Message[];
+}) {
   console.log("✅ saveChat() called with:", { id, messages });
 
   if (!id) {
@@ -32,7 +42,10 @@ export async function saveChat({ id, messages }: { id: ChatID; messages: Message
       console.error(`🚨 Message at index ${index} is undefined!`);
     }
     if (!msg?.role || !msg?.content) {
-      console.error(`🚨 Message at index ${index} is missing required fields:`, msg);
+      console.error(
+        `🚨 Message at index ${index} is missing required fields:`,
+        msg,
+      );
     }
     // for each message, append to the database IF it does not yet exist.
     try {
@@ -42,17 +55,21 @@ export async function saveChat({ id, messages }: { id: ChatID; messages: Message
     }
   });
 
-  const messagesWithChatID = messages.map((msg) => {return {...msg, chatId: id}})
+  const messagesWithChatID = messages.map((msg) => {
+    return { ...msg, chatId: id };
+  });
 
   // add all messages to db, except the ones that were already there.
   try {
-    await db.insert(dbMessages).values(messagesWithChatID).onConflictDoNothing()
-  } catch(e){
-    console.error("failed to add to db: ", e)
+    await db
+      .insert(dbMessages)
+      .values(messagesWithChatID)
+      .onConflictDoNothing();
+  } catch (e) {
+    console.error("failed to add to db: ", e);
   }
 
   console.log("💾 Preparing to insert messages into database:", messages);
-
 
   console.log("✅ Messages saved successfully!");
 }

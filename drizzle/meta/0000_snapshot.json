@@ -71,9 +71,7 @@
       "indexes": {
         "chat_idx": {
           "name": "chat_idx",
-          "columns": [
-            "chat_id"
-          ],
+          "columns": ["chat_id"],
           "isUnique": false
         }
       },
@@ -82,12 +80,8 @@
           "name": "fractal-chatbot_message_chat_id_fractal-chatbot_chat_id_fk",
           "tableFrom": "fractal-chatbot_message",
           "tableTo": "fractal-chatbot_chat",
-          "columnsFrom": [
-            "chat_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chat_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
