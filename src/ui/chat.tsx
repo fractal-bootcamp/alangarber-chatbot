@@ -1,10 +1,11 @@
 "use client";
 
-import { useChat, useCompletion } from "@ai-sdk/react";
+import { useChat, useCompletion, experimental_useObject as useObject } from "@ai-sdk/react";
 import { type Message } from "ai";
+import Spinner from "react-bootstrap/Spinner";
 import { Weather } from "@/app/components/weather";
 import { Stock } from "@/app/components/stock";
-import Spinner from "react-bootstrap/Spinner";
+import { notificationSchema } from "@/app/api/notifications/schema";
 
 export default function Chat({
   id,
@@ -44,7 +45,12 @@ export default function Chat({
   } = useCompletion({
     api: "/api/completion",
     experimental_throttle: 50,
-  })
+  });
+
+  const { object, submit } = useObject({
+    api: "/api/notifications",
+    schema: notificationSchema,
+  });
 
   if (!id) {
     console.error("🚨 Error: Chat ID is missing in Chat component!");
@@ -229,7 +235,7 @@ export default function Chat({
       </form>
 
       {/* Completion Input */}
-            <h2 style={{ marginTop: "20px" }}>AI Completion</h2>
+      <h2 style={{ marginTop: "20px" }}>AI Completion</h2>
       <form onSubmit={handleCompletionSubmit}>
         <input
           type="text"
@@ -244,8 +250,21 @@ export default function Chat({
         </button>
       </form>
 
-        {isLoading ? <Spinner style={{ marginTop: "10px" }} /> : null}
-     <div style={{ marginTop: "10px", fontStyle: "italic" }}>{completion}</div>
+      {isLoading ? <Spinner style={{ marginTop: "10px" }} /> : null}
+      <div style={{ marginTop: "10px", fontStyle: "italic" }}>{completion}</div>
+
+      {/* Notification Generation */}
+      <h2 style={{ marginTop: "20px" }}>AI Notifications </h2>
+        <button onClick={() => submit("Exciting messages about the bootcamp at Fractal Tech Hub!")}>
+          Generate notifications
+        </button>
+
+        {object?.notifications?.map((notification, index) => (
+          <div key={index}>
+            <p>{notification?.name}</p>
+            <p>{notification?.message}</p>
+          </div>
+        ))}
     </div>
   );
 }
