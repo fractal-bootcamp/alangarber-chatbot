@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3f04a279-3854-4425-a1c5-10a169381d6b",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "0e771062-5475-4f54-b4ed-69bec15cb2dc",
+  "prevId": "3f04a279-3854-4425-a1c5-10a169381d6b",
   "tables": {
     "fractal-chatbot_chat": {
       "name": "fractal-chatbot_chat",
@@ -33,16 +33,16 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "chat_id": {
           "name": "chat_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "role": {
