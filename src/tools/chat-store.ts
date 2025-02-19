@@ -1,6 +1,6 @@
 import { db } from "@/server/db/index";
-import { chats, messages } from "@/server/db/schema";
-import { generateId } from "ai";
+import { chats, messages as dbMessages } from "@/server/db/schema";
+import { generateId, type Message } from "ai";
 import { eq } from "drizzle-orm";
 
 export async function createChat(): Promise<string> {
@@ -9,45 +9,61 @@ export async function createChat(): Promise<string> {
   return id;
 }
 
-export async function loadChat(id: string) {
-  return db.select().from(messages).where(eq(messages.chatId, id)).orderBy(messages.createdAt);
+export async function loadChat(id: string): Promise<Message[]> {
+  return await db
+    .select()
+    .from(dbMessages)
+    .where(eq(dbMessages.chatId, id))
+    .orderBy(dbMessages.createdAt);
 }
 
-export async function saveChat({ id, messages: chatMessages }: { id: string; messages: { role?: string; content?: string }[] }) {
-  console.log("✅ saveChat() called with:", { id, messages: chatMessages });
+type ChatID = string;
+
+export async function saveChat({
+  id,
+  messages,
+}: {
+  id: ChatID;
+  messages: Message[];
+}) {
+  console.log("✅ saveChat() called with:", { id, messages });
 
   if (!id) {
     console.error("🚨 Error: Chat ID is undefined in saveChat()");
     throw new Error("Chat ID cannot be undefined");
   }
-  if (!Array.isArray(chatMessages) || chatMessages.length === 0) {
+  if (!Array.isArray(messages) || messages.length === 0) {
     console.error("🚨 Error: Messages are undefined or empty in saveChat()");
     throw new Error("Messages cannot be undefined or empty");
   }
 
-  chatMessages.forEach((msg, index) => {
+  messages.forEach((msg, index) => {
     if (!msg) {
       console.error(`🚨 Message at index ${index} is undefined!`);
     }
     if (!msg?.role || !msg?.content) {
-      console.error(`🚨 Message at index ${index} is missing required fields:`, msg);
+      console.error(
+        `🚨 Message at index ${index} is missing required fields:`,
+        msg,
+      );
     }
   });
 
-  console.log("💾 Preparing to insert messages into database:", chatMessages);
+  const messagesWithChatID = messages.map((msg) => {
+    return { ...msg, chatId: id };
+  });
 
+  // add all messages to db, except the ones that were already there.
   try {
-    await db.insert(messages).values(
-      chatMessages.map((msg) => ({
-        chatId: id,
-        role: msg.role!,
-        content: msg.content!,
-      }))
-    );
-  } catch (error) {
-    console.error("🔥 Database Insertion Error:", error);
-    throw error;
+    await db
+      .insert(dbMessages)
+      .values(messagesWithChatID)
+      .onConflictDoNothing();
+  } catch (e) {
+    console.error("failed to add to db: ", e);
   }
+
+  console.log("💾 Preparing to insert messages into database:", messages);
 
   console.log("✅ Messages saved successfully!");
 }
