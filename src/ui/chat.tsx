@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { type Message } from "ai";
+import { Weather } from "@/app/components/weather";
 
 export default function Chat({
   id,
@@ -149,8 +150,37 @@ export default function Chat({
                             case "result":
                               return (
                                 <div key={callId} className="text-gray-500">
-                                  Weather in {args?.city ?? "unknown city"}:{" "}
+                                  <Weather {...part.toolInvocation.result} />
                                   {part.toolInvocation.result}
+                                </div>
+                              );
+                          }
+                          break;
+                        }
+
+                        case "getStockInformation": {
+                          const args = part.toolInvocation.args as {
+                            symbol?: string;
+                            price?: number;
+                          };
+                          switch (part.toolInvocation.state) {
+                            case "partial-call":
+                              return (
+                                <pre key={callId}>
+                                  {JSON.stringify(part.toolInvocation, null, 2)}
+                                </pre>
+                              );
+                            case "call":
+                              return (
+                                <div key={callId} className="text-gray-500">
+                                  Getting price information for{" "}
+                                  {args?.symbol ?? "unknown symbol"}...
+                                </div>
+                              );
+                            case "result":
+                              return (
+                                <div key={callId} className="text-gray-500">
+                                  The price of {args?.symbol ?? "unknown symbol"} is {args?.price ?? "unknown price"}
                                 </div>
                               );
                           }
