@@ -27,15 +27,49 @@ export const getLocation = createTool({
 });
 
 // Add a new stock tool
+const ALPHAVANTAGE_API_KEY = process.env.ALPHAVANTAGE_API_KEY;
+const ALPHAVANTAGE_URL = "https://www.alphavantage.co/query";
+
+if (!ALPHAVANTAGE_API_KEY) {
+  throw new Error("Missing AlphaVantage API key. Check your .env file.");
+}
+
 export const getStockInformation = createTool({
   description: "Get price for a stock",
   parameters: z.object({
     symbol: z.string().describe("The stock symbol to get the price for"),
   }),
   execute: async function ({ symbol }) {
-    // Simulated API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return { symbol, price: 100 };
+    try {
+      const url = `${ALPHAVANTAGE_URL}?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHAVANTAGE_API_KEY}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "User-Agent": "request",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `AlphaVantage API error: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const data = await response.json();
+
+      if (!data["Global Quote"] || !data["Global Quote"]["05. price"]) {
+        throw new Error("Invalid response format from AlphaVantage.");
+      }
+
+      return {
+        symbol,
+        price: parseFloat(data["Global Quote"]["05. price"]),
+      };
+    } catch (error) {
+      console.error("Error fetching stock data:", error);
+      return { error: "Failed to fetch stock price. Try again later." };
+    }
   },
 });
 

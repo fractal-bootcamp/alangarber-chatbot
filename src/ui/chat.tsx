@@ -1,6 +1,10 @@
 "use client";
 
-import { useChat, useCompletion, experimental_useObject as useObject } from "@ai-sdk/react";
+import {
+  useChat,
+  useCompletion,
+  experimental_useObject as useObject,
+} from "@ai-sdk/react";
 import { type Message } from "ai";
 import Spinner from "react-bootstrap/Spinner";
 import { Weather } from "@/app/components/weather";
@@ -47,9 +51,20 @@ export default function Chat({
     experimental_throttle: 50,
   });
 
-  const { object, submit } = useObject({
+  const { error, object, submit } = useObject({
     api: "/api/notifications",
     schema: notificationSchema,
+    onFinish({ object, error }) {
+      // typed object, undefined if schema validation fails:
+      console.log("Object generation completed:", object);
+
+      // error, undefined if schema validation succeeds:
+      console.log("Schema validation error:", error);
+    },
+    onError(error) {
+      // error during fetch request:
+      console.error("An error occurred:", error);
+    },
   });
 
   if (!id) {
@@ -255,16 +270,22 @@ export default function Chat({
 
       {/* Notification Generation */}
       <h2 style={{ marginTop: "20px" }}>AI Notifications </h2>
-        <button onClick={() => submit("Exciting messages about the bootcamp at Fractal Tech Hub!")}>
-          Generate notifications
-        </button>
+      <button
+        onClick={() =>
+          submit("Exciting messages about the bootcamp at Fractal Tech Hub!")
+        }
+      >
+        Generate notifications
+      </button>
 
-        {object?.notifications?.map((notification, index) => (
-          <div key={index}>
-            <p>{notification?.name}</p>
-            <p>{notification?.message}</p>
-          </div>
-        ))}
+      {error && <div>An error occurred.</div>}
+
+      {object?.notifications?.map((notification, index) => (
+        <div key={index}>
+          <p>{notification?.name}</p>
+          <p>{notification?.message}</p>
+        </div>
+      ))}
     </div>
   );
 }

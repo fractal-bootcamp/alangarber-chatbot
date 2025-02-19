@@ -6,13 +6,14 @@ import { notificationSchema } from "./schema";
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-    const context = await req.json();
+  const context = await req.json();
 
-    const result = streamObject({
-        model: openai("gpt-4-turbo"),
-        schema: notificationSchema,
-        prompt: "Generate 3 notifications for a messages app in this context: " + context,
-    });
+  const result = streamObject({
+    model: openai("gpt-4-turbo"),
+    schema: notificationSchema,
+    prompt:
+      "Generate 3 notifications for a messages app in this context: " + context,
+  });
 
-    return result.toTextStreamResponse();
+  return result.toTextStreamResponse();
 }
