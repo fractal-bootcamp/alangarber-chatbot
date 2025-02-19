@@ -1,8 +1,10 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
+import { useChat, useCompletion } from "@ai-sdk/react";
 import { type Message } from "ai";
 import { Weather } from "@/app/components/weather";
+import { Stock } from "@/app/components/stock";
+import Spinner from "react-bootstrap/Spinner";
 
 export default function Chat({
   id,
@@ -12,11 +14,11 @@ export default function Chat({
   initialMessages?: Message[];
 }) {
   const {
-    input,
-    handleInputChange,
-    handleSubmit,
+    input: chatInput,
+    handleInputChange: handleChatInputChange,
+    handleSubmit: handleChatSubmit,
     messages,
-    status,
+    status: chatStatus,
     addToolResult,
   } = useChat({
     id,
@@ -32,6 +34,17 @@ export default function Chat({
       }
     },
   });
+
+  const {
+    completion,
+    input: completionInput,
+    handleInputChange: handleCompletionInputChange,
+    handleSubmit: handleCompletionSubmit,
+    isLoading,
+  } = useCompletion({
+    api: "/api/completion",
+    experimental_throttle: 50,
+  })
 
   if (!id) {
     console.error("🚨 Error: Chat ID is missing in Chat component!");
@@ -151,7 +164,6 @@ export default function Chat({
                               return (
                                 <div key={callId} className="text-gray-500">
                                   <Weather {...part.toolInvocation.result} />
-                                  {part.toolInvocation.result}
                                 </div>
                               );
                           }
@@ -180,7 +192,7 @@ export default function Chat({
                             case "result":
                               return (
                                 <div key={callId} className="text-gray-500">
-                                  The price of {args?.symbol ?? "unknown symbol"} is {args?.price ?? "unknown price"}
+                                  <Stock {...part.toolInvocation.result} />
                                 </div>
                               );
                           }
@@ -195,25 +207,45 @@ export default function Chat({
         ))}
       </div>
 
+      {/* Chat Input */}
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleChatSubmit}
         style={{ display: "flex", gap: "10px", justifyContent: "center" }}
       >
         <input
           type="text"
-          value={input}
-          onChange={handleInputChange}
+          value={chatInput}
+          onChange={handleChatInputChange}
           placeholder="Type your message..."
           style={{ flex: "1", padding: "10px" }}
         />
         <button
           type="submit"
-          disabled={status !== "ready"}
+          disabled={chatStatus !== "ready"}
           style={{ padding: "10px 15px" }}
         >
           Send
         </button>
       </form>
+
+      {/* Completion Input */}
+            <h2 style={{ marginTop: "20px" }}>AI Completion</h2>
+      <form onSubmit={handleCompletionSubmit}>
+        <input
+          type="text"
+          name="prompt"
+          value={completionInput}
+          onChange={handleCompletionInputChange}
+          placeholder="Get AI-powered suggestions..."
+          style={{ padding: "10px", width: "100%" }}
+        />
+        <button type="submit" style={{ padding: "10px", marginTop: "10px" }}>
+          Generate
+        </button>
+      </form>
+
+        {isLoading ? <Spinner style={{ marginTop: "10px" }} /> : null}
+     <div style={{ marginTop: "10px", fontStyle: "italic" }}>{completion}</div>
     </div>
   );
 }
